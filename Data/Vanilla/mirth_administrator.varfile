@@ -1,0 +1,12 @@
+# install4j response file for Mirth Connect Administrator Launcher 1.4.1
+executeLauncherAction$Boolean=false
+sys.adminRights$Boolean=true
+sys.component.1639$Boolean=true
+sys.component.openjdk8$Boolean=false
+sys.fileAssociation.extensions$StringArray="jnlp"
+sys.fileAssociation.launchers$StringArray="60"
+sys.installationDir=C\:\\Program Files\\Mirth Connect Administrator Launcher
+sys.languageId=en
+sys.programGroupAllUsers$Boolean=true
+sys.programGroupDisabled$Boolean=false
+sys.programGroupName=Mirth Connect Administrator Launcher

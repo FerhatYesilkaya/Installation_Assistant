@@ -1,0 +1,26 @@
+# install4j response file for Mirth Connect 4.4.2.b326
+dir.appdata=C\:\Program Files\Mirth Connect\appdata
+dir.logs=C\:\Program Files\Mirth Connect\logs
+executeLauncherAction$Boolean=false
+fileChooser=
+http.port.new$Long=8888
+https.port.new$Long=8443
+installServiceAction$Boolean=true
+key=
+mySelection$Integer=-1
+password.minlength.new$Long=0
+password.minlower.new$Long=0
+password.minnumeric.new$Long=0
+password.minspecial.new$Long=0
+password.minupper.new$Long=0
+showFileAction$Boolean=false
+sys.adminRights$Boolean=true
+sys.component.1357$Boolean=true
+sys.component.2047$Boolean=true
+sys.component.31$Boolean=true
+sys.component.33$Boolean=true
+sys.installationDir=C\:\Program Files\Mirth Connect
+sys.languageId=en
+sys.programGroupAllUsers$Boolean=true
+sys.programGroupDisabled$Boolean=false
+sys.programGroupName=Mirth Connect
