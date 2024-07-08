@@ -1,7 +1,9 @@
-Prerequisites
-- Check in "configurables.ini" if the entry "MirthAdministratorSetupFileName" and "MirthConnectSetupFileName" have the correct value. This is the filename of the mirth connect and mirth Administrator Setups.
+IMPORTANT: This is the assistant to only update/install Mirth. There are no adjustments in Navify Pathology Lab Hub if you update. Please adjust in nPLH (ports,...etc) before starting an update.
 
-- Check in "configurables.ini" if the entry "intersystemsjdbcName" and "mirthConnectServiceName" have the correct value. This is the filename of the jdbc Drivers.
+Prerequisites
+- Check in "configurables.ini" if the entry "MirthAdministratorSetupFileName" and "MirthConnectSetupFileName" have the correct value. This is the filename of Mirth Connect and Mirth Administrator setups.
+
+- Check in "configurables.ini" if the entry "intersystemsjdbcName" and "cachejdbcName" have the correct value. This is the filename of the jdbc drivers.
 --> The Installation assistant is using the jdbc Driver in the "Intersystems Driver"-Folder not the "Intersystems Drivers"-Folder. There are two Folders with same files. 
 
 How-to-use
