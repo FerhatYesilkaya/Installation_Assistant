@@ -452,7 +452,7 @@ Func chooseNewMirthInstallationPath()
                 MsgBox($MB_SYSTEMMODAL, "", "No folder was selected.")
         Else
                 ; Display the selected folder.
-                GUICtrlSetData($tf_new_mirth_installation_path,$sFileSelectFolder&"Mirth Connect")
+                GUICtrlSetData($tf_new_mirth_installation_path,$sFileSelectFolder&"\Mirth Connect")
         EndIf
 EndFunc
 
