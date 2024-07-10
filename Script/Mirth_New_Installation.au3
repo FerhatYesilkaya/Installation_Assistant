@@ -50,7 +50,7 @@ $tf_openjdk_destination_path = GUICtrlCreateInput($openjdk_destination_path,5,65
 local $btn_choose_openjdk_destination_path = GUICtrlCreateButton("Directory",210,65,100,20)
 
 GUICtrlCreateLabel("New MIRTH installation path",5,95,200,25)
-$tf_new_mirth_installation_path = GUICtrlCreateInput($mirth_install_path,5,110,200,20, $ES_READONLY)
+$tf_new_mirth_installation_path = GUICtrlCreateInput(GoBack($mirth_install_path,1),5,110,200,20, $ES_READONLY)
 local $btn_choose_new_mirth_install_path = GUICtrlCreateButton("Directory",210,110,100,20)
 
 
@@ -77,6 +77,7 @@ ConsoleWrite('Window Height = ' & $aWindow_Size[3] & @CRLF)
 Local $aWindowClientArea_Size = WinGetClientSize($hGUI)
 ConsoleWrite('Window Client Area Width  = ' & $aWindowClientArea_Size[0] & @CRLF)
 ConsoleWrite('Window Client Area Height = ' & $aWindowClientArea_Size[1] & @CRLF)
+
 GUISetState(@SW_SHOW, $hGUI)
 
 ; Loop until the user exits.
@@ -136,7 +137,8 @@ func uninstallJava()
 
 
         if(UBound($aList) < 2) Then
-                logging("Error","Could not find the Uninstall Path in the Registry to uninstall Java JRE. Please deactivate this step if you want to skip it",true,16,true)
+                logging("Warning","Could not find the Uninstall Path in the Registry to uninstall Java JRE. Please uninstall it manually if necessary")
+                return 0
         endif
 
 
@@ -144,7 +146,7 @@ func uninstallJava()
         $newString = StringReplace($aList[1][4],"/I","/X")
 
 
-        executeCMD($newString&" /qn")
+        executeCMD('"'&$newString&'" /qn')
 
 
 EndFunc
@@ -193,29 +195,29 @@ Func installMirthConnect()
                 logging("Error","Could not move mirth_administrator.varfile into root directory",false,true,16,true)
         Endif
         $newString = StringReplace(GUICtrlRead($tf_new_mirth_installation_path),"\","\\")
-        stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","dir.appdata=C\:\Program Files\Mirth Connect\appdata","dir.appdata="&$newString&"\\appdata",false)
-        stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","dir.logs=C\:\Program Files\Mirth Connect\logs","dir.logs="&$newString&"\\logs",false)
-        stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","sys.installationDir=C\:\Program Files\Mirth Connect","sys.installationDir="&$newString,false)
-        executeCMD(GoBack(@ScriptDir,2)&'\'&readIni("names","MirthConnectSetupFileName")&' -q -varfile "'&GoBack(@ScriptDir,1)&'\Data\mirth_connect.varfile"')
+        stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","dir.appdata=C\:\Program Files\Mirth Connect\appdata","dir.appdata="&$newString&"\\Mirth Connect\\appdata",false)
+        stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","dir.logs=C\:\Program Files\Mirth Connect\logs","dir.logs="&$newString&"\\Mirth Connect\\logs",false)
+        stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","sys.installationDir=C\:\Program Files\Mirth Connect","sys.installationDir="&$newString&"\\Mirth Connect",false)
+        executeCMD('"'&GoBack(@ScriptDir,2)&'\'&readIni("names","MirthConnectSetupFileName")&'" -q -varfile "'&GoBack(@ScriptDir,1)&'\Data\mirth_connect.varfile"')
 EndFunc
 
 
 
 Func installMirthAdministrator()
         logging("Info","Installing Mirth Administrator",true)
-        $newString = StringReplace(GoBack(GUICtrlRead($tf_new_mirth_installation_path),1),"\","\\")
+        $newString = StringReplace(GUICtrlRead($tf_new_mirth_installation_path),"\","\\")
         stringReplaceFile(GoBack(@ScriptDir,1)&"\Data\mirth_administrator.varfile","sys.installationDir=C\:\\Program Files\\Mirth Connect Administrator Launcher","sys.installationDir="& $newString&"\\Mirth Connect Administrator Launcher",false)
-        executeCMD(GoBack(@ScriptDir,2)&'\'&readIni("names","MirthAdministratorSetupFileName")&' -q -varfile "'&GoBack(@ScriptDir,1)&'\Data\mirth_administrator.varfile"')
+        executeCMD('"'&GoBack(@ScriptDir,2)&'\'&readIni("names","MirthAdministratorSetupFileName")&'" -q -varfile "'&GoBack(@ScriptDir,1)&'\Data\mirth_administrator.varfile"')
 EndFunc
 
 
 Func configureDBDriversXML()
         logging("Info","Configuring driver.xml file",true)
-        If FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\conf\dbdrivers.xml") Then
-                stringReplaceFile(GUICtrlRead($tf_new_mirth_installation_path)&"\conf\dbdrivers.xml","</drivers>",'<driver class="com.intersystems.jdbc.CacheDriver" name="Cache" template="jdbc:Cache://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />')
-                stringReplaceFile(GUICtrlRead($tf_new_mirth_installation_path)&"\conf\dbdrivers.xml","</drivers>",'<driver class="com.intersystems.jdbc.IRISDriver" name="IRIS" template="jdbc:IRIS://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />')
+        If FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml") Then
+                stringReplaceFile(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml","</drivers>",'<driver class="com.intersystems.jdbc.CacheDriver" name="Cache" template="jdbc:Cache://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />')
+                stringReplaceFile(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml","</drivers>",'<driver class="com.intersystems.jdbc.IRISDriver" name="IRIS" template="jdbc:IRIS://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />')
         Else
-                logging("Error","Could not find "&GUICtrlRead($tf_new_mirth_installation_path)&"\conf\dbdrivers.xml",false,true,16,true)
+                logging("Error","Could not find "&GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml",false,true,16,true)
         Endif
 EndFunc
 
@@ -259,9 +261,9 @@ Func executeCMD($command, $runAsRunWait=true)
         logging("Info","Executing CMD command: "&$command)
 
         if($runAsRunWait) Then
-                Local $iPID = RunWait('cmd.exe /c '&$command, '', @SW_HIDE, 2); $STDOUT_CHILD
+                Local $iPID = RunWait(@ComSpec&' /c "'&$command&'"', '', @SW_HIDE, 2); $STDOUT_CHIL
         Else
-                Local $iPID = Run('cmd.exe /c '&$command, '', @SW_HIDE, 2); $STDOUT_CHILD
+                Local $iPID = Run(@ComSpec&' /c '&$command, '', @SW_HIDE, 2); $STDOUT_CHILD
         endif
         If @error Then
                 logging("Error","Could not get any information with following CMD command: "&$command,true,16,true)
@@ -342,7 +344,7 @@ Func moveJarFiles()
 
         if(readIni("workflow","cachejdbcJARIsExistent") = "true") Then
                 If (FileExists(GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","cachejdbcName"))) Then 
-                        FileCopy(GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","cachejdbcName"),GUICtrlRead($tf_new_mirth_installation_path)&"\server-lib\database",1)
+                        FileCopy(GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","cachejdbcName"),GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\server-lib\database",1)
                 Else
                         logging("Error","Could not find "& GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","cachejdbcName"),true,16,true)
                 Endif
@@ -352,7 +354,7 @@ Func moveJarFiles()
 
         if(readIni("workflow","intersystemsjdbcJARIsExistent") = "true") Then
                 If (FileExists(GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","intersystemsjdbcName"))) Then 
-                        FileCopy(GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","intersystemsjdbcName"),GUICtrlRead($tf_new_mirth_installation_path)&"\server-lib\database",1)
+                        FileCopy(GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","intersystemsjdbcName"),GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\server-lib\database",1)
                 Else
                         logging("Error","Could not find "& GoBack(@ScriptDir,2)&"\Intersystems Driver\"&readIni("names","intersystemsjdbcName"),true,16,true)
                 Endif
@@ -407,7 +409,7 @@ Func importData()
                 return true
         endif
         logging("Info","Importing configs into Mirth",true)
-        Local $iPID = Run(GUICtrlRead($tf_new_mirth_installation_path)&"\mccommand.exe", @SystemDir, @SW_HIDE, $STDIN_CHILD + $STDOUT_CHILD)
+        Local $iPID = Run(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\mccommand.exe", @SystemDir, @SW_HIDE, $STDIN_CHILD + $STDOUT_CHILD)
         logging("Info","Trying to establish connection to Mirth Conenct CLI")
         StdinWrite($iPID, 'importcfg "'&GUICtrlRead($tf_xml_backup_file)&'"' & @CRLF & 'importmap "'&GUICtrlRead($tf_properties_file)&'"' & @CRLF)
         StdinWrite($iPID)
@@ -452,7 +454,7 @@ Func chooseNewMirthInstallationPath()
                 MsgBox($MB_SYSTEMMODAL, "", "No folder was selected.")
         Else
                 ; Display the selected folder.
-                GUICtrlSetData($tf_new_mirth_installation_path,$sFileSelectFolder&"\Mirth Connect")
+                GUICtrlSetData($tf_new_mirth_installation_path,$sFileSelectFolder)
         EndIf
 EndFunc
 
