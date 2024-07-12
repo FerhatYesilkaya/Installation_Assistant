@@ -47,7 +47,7 @@ $tf_new_mirth_installation_path = GUICtrlCreateInput(GoBack($mirth_install_path,
 local $btn_choose_new_mirth_install_path = GUICtrlCreateButton("Directory",210,110,100,20)
 
 
-GUICtrlCreateLabel("Current MIRTH installation path",5,140,200,25)
+GUICtrlCreateLabel("Current MIRTH Connect installation path",5,140,200,25)
 $tf_current_mirth_installation_path = GUICtrlCreateInput($mirth_install_path,5,155,200,20, $ES_READONLY)
 local $btn_choose_current_install_path = GUICtrlCreateButton("Directory",210,155,100,20)
 
@@ -70,6 +70,7 @@ ConsoleWrite('Window Height = ' & $aWindow_Size[3] & @CRLF)
 Local $aWindowClientArea_Size = WinGetClientSize($hGUI)
 ConsoleWrite('Window Client Area Width  = ' & $aWindowClientArea_Size[0] & @CRLF)
 ConsoleWrite('Window Client Area Height = ' & $aWindowClientArea_Size[1] & @CRLF)
+
 
 GUISetState(@SW_SHOW, $hGUI)
 
@@ -106,7 +107,7 @@ While 1
                                 installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
-                                configureBackupFile()
+                                configureBackupFile($progrssbarLabel,GUICtrlRead(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml'),$co_database_engine)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel, $mirthServiceName)
@@ -145,6 +146,10 @@ Func uninstallMirthConnect()
                 return 0
         endif
 
+        if (FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml') = 0 OR FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-configMap.properties') = 0) Then
+                logging($progrssbarLabel,"Error","Backup of configuration Map or general Backup not found. Both files are mandatory before uninstalling Mirth",false,true,16,true)
+        endif
+
         logging($progrssbarLabel,"Info","Uninstalling Mirth Connect",true)
         executeCMD($progrssbarLabel,'"'&GUICtrlRead($tf_current_mirth_installation_path)&'\uninstall.exe" -q')
 
@@ -171,19 +176,6 @@ func findFile($pattern)
 
         ; Close the search handle.
         FileClose($hSearch)
-EndFunc
-
-Func configureBackupFile()
-        logging($progrssbarLabel,"Info","Configuring backup file",true)
-        If FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml') Then
-                stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',"var driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
-                stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',"driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
-                if(GUICtrlRead($co_database_engine) = "IRIS") Then
-                        stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersys.jdbc.CacheDriver&apos;,&apos;jdbc:Cache:","DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:",False)
-                EndIf
-        Else
-                logging($progrssbarLabel,"Error",'Could not find '&GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',false,true,16,true)
-        Endif
 EndFunc
 
 

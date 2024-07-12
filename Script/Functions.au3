@@ -85,6 +85,24 @@ Func GoBack($path, $levels = 1)
 	Return $path
 EndFunc
 
+Func configureBackupFile(ByRef $progrssbarLabel, $backupFilePath, ByRef $co_database_engine)
+	if ($backupFilePath = "") Then
+		logging($progrssbarLabel,"Warning","No backup file imported, because no file selected")
+		return 0
+	endif
+
+	logging($progrssbarLabel,"Info","Configuring backup file",true)
+	If (FileExists($backupFilePath) = 1) Then
+			stringReplaceFile($progrssbarLabel,$backupFilePath,"var driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
+			stringReplaceFile($progrssbarLabel,$backupFilePath,"driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
+			if(GUICtrlRead($co_database_engine) = "IRIS") Then
+					stringReplaceFile($progrssbarLabel,$backupFilePath,"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersys.jdbc.CacheDriver&apos;,&apos;jdbc:Cache:","DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:",False)
+			EndIf
+	Else
+			logging($progrssbarLabel,"Error",'Could not find '&$backupFilePath,false,true,16,true)
+	Endif
+EndFunc
+
 Func logging(ByRef $progrssbarLabel, $level, $message, $showProgess=false, $showMessageBox=false,$flagForMessageBox=64, $doExit=false)
 	If Not FileExists(GoBack(@ScriptDir,1)&"\messages.log") Then
 			FileOpen(@ScriptDir & "\messages.log")
@@ -117,7 +135,13 @@ Func moveOpenJDK(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path)
 	If (FileExists(GoBack(@ScriptDir,2)&"\openjdk")) Then 
 			if(DirMove(GoBack(@ScriptDir,2)&"\openjdk",GUICtrlRead($tf_openjdk_destination_path),1) = 0) Then
 					logging($progrssbarLabel,"Warning","Could not move openJDK File(s). Files are already located there")
+			else
+				logging($progrssbarLabel,"Info","openJDK moved to: "&GUICtrlRead($tf_openjdk_destination_path))
 			endif
+			if @error Then
+				logging($progrssbarLabel,"Error","Could not move openJDK Folder",false,true,16,true)
+			endif
+
 	Else
 			logging($progrssbarLabel,"Error","Could not find "& GoBack(@ScriptDir,2)&"\openjdk",true,16,true)
 	Endif
@@ -324,7 +348,7 @@ Func importData(ByRef $progrssbarLabel,$mirthBackupXML, $configProperties, $tf_n
         logging($progrssbarLabel,"Info","Importing configs into Mirth",true)
         Local $iPID = Run(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\mccommand.exe", @SystemDir, @SW_HIDE, $STDIN_CHILD + $STDOUT_CHILD)
         logging($progrssbarLabel,"Info","Trying to establish connection to Mirth Conenct CLI")
-        StdinWrite($iPID, 'importcfg "'&$mirthBackupXML&'"' & @CRLF & 'importmap "'&$configProperties&@YEAR&'-'&@MON&'-'&@MDAY&'-configMap.properties'&'"' & @CRLF)
+        StdinWrite($iPID, 'importcfg "'&$mirthBackupXML&'"' & @CRLF & 'importmap "'&$configProperties&'"' & @CRLF)
         StdinWrite($iPID)
         $counter = 0
         While 1

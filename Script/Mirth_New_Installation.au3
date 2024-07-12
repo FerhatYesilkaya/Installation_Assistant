@@ -91,7 +91,7 @@ While 1
                                 GUICtrlSetState($btn_start_update,$GUI_DISABLE)
                                 logging($progrssbarLabel,"Info","Update started", true)
                                 unzipOpenJDK($progrssbarLabel)
-                                moveOpenJDK($progrssbarLabel,$openjdk_destination_path)
+                                moveOpenJDK($progrssbarLabel,$tf_openjdk_destination_path)
                                 killProcesses($progrssbarLabel,"mccommand.exe")
                                 killProcesses($progrssbarLabel,"mcmanager.exe")
                                 killProcesses($progrssbarLabel,"mcserver.exe")
@@ -104,6 +104,7 @@ While 1
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel,$mirthServiceName)
 				if(isImportNeeded()) Then
+                                        configureBackupFile($progrssbarLabel,GUICtrlRead($tf_xml_backup_file),$co_database_engine)
 					importData($progrssbarLabel,GUICtrlRead($tf_xml_backup_file),GUICtrlRead($tf_properties_file),$tf_new_mirth_installation_path)
 				EndIf
                                 logging($progrssbarLabel,"Info","Update completed",true,true,64,true)
