@@ -211,6 +211,36 @@ func uninstallJava(ByRef $progrssbarLabel)
 EndFunc
 
 
+Func checkForJRE(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path)
+	logging($progrssbarLabel,"Info","Checking if JAVA_HOME already exists")
+	$currentJavaHome = EnvGet("JAVA_HOME")
+
+	if($currentJavaHome = "") Then
+		logging($progrssbarLabel,"Info","No JAVA_HOME system variable detected. Creating new JAVA_HOME variable with path: "&GUICtrlRead($tf_openjdk_destination_path)&"\openjdk")
+		_EnvVarSet("JAVA_HOME",GUICtrlRead($tf_openjdk_destination_path)&"\openjdk",2)
+	else
+		logging($progrssbarLabel,"Info","JAVA_HOME system variable detected. Current path: "&$currentJavaHome)
+	EndIf
+
+EndFunc
+
+Func _EnvVarSet($_sEnvVarName = "", $_sEnvVarValue = "", $_iEnvVarType = 3)
+    Local $oEnvVarType, $aEnvVarType[5] = [4, "PROCESS", "SYSTEM", "USER", "VOLATILE"]
+    Local $oWshShell = ObjCreate("WScript.Shell")
+    Switch $_iEnvVarType
+        Case 0
+            For $i = 1 To $aEnvVarType[0]
+                $oEnvVarType = $oWshShell.Environment($aEnvVarType[$i])
+                $oEnvVarType($_sEnvVarName) = $_sEnvVarValue
+            Next
+        Case 1 To 4
+            $oEnvVarType = $oWshShell.Environment($aEnvVarType[$_iEnvVarType])
+             $oEnvVarType($_sEnvVarName) = $_sEnvVarValue
+        Case Else
+            Return SetError(1)
+    EndSwitch
+EndFunc
+
 Func installMirthConnect(ByRef $progrssbarLabel, $tf_new_mirth_installation_path)
 	logging($progrssbarLabel,"Info","Installing Mirth Connect",true)
 	FileCopy(GoBack(@ScriptDir,1)&'\Data\Vanilla\mirth_connect.varfile',GoBack(@ScriptDir,1)&'\Data',1)

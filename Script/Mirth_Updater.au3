@@ -88,7 +88,8 @@ While 1
                 Case $btn_choose_openjdk_destination_path
                         chooseOpenJDKDestinationPath()
                 Case $btn_start_update
-                        if(isAllDataEntered() = true) Then 
+                        if(isAllDataEntered() = true) Then
+                                WriteAllEnteredDataInLogs()
                                 GUICtrlSetState($btn_start_update,$GUI_DISABLE)
                                 logging($progrssbarLabel,"Info","Update started", true)
                                 unzipOpenJDK($progrssbarLabel)
@@ -104,6 +105,7 @@ While 1
                                 uninstallJava($progrssbarLabel)
                                 deleteFiles()
                                 Sleep(2000)
+                                checkForJRE($progrssbarLabel,$tf_openjdk_destination_path)
                                 installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
@@ -129,6 +131,14 @@ WEnd
 
 ; Delete the previous GUI and all controls.
 GUIDelete($hGUI)
+
+Func WriteAllEnteredDataInLogs()
+        logging($progrssbarLabel,"Info","Database-Engine: "&GUICtrlRead($co_database_engine))
+        logging($progrssbarLabel,"Info","OpenJDK-Path: "&GUICtrlRead($tf_openjdk_destination_path))
+        logging($progrssbarLabel,"Info","New Mirth installation-path: "&GUICtrlRead($tf_new_mirth_installation_path))
+        logging($progrssbarLabel,"Info","Current Mirth installation-path: "&GUICtrlRead($tf_current_mirth_installation_path))
+EndFunc
+
 
 func showPassword()
 
