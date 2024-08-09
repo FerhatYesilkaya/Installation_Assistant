@@ -232,7 +232,7 @@ Func checkForJRE(ByRef $progrssbarLabel,  ByRef $tf_openjdk_current_path , ByRef
 		logging($progrssbarLabel,"Info","No JAVA_HOME system variable detected")
 		if(GUICtrlRead($tf_openjdk_current_path) = "") Then 
 			logging($progrssbarLabel,"Info","Creating new JAVA_HOME variable with path: "&GUICtrlRead($tf_openjdk_destination_path)&"\openjdk")
-			EnvSet("JAVA_HOME", "C:\ROCHE")
+			EnvSet("JAVA_HOME", GUICtrlRead($tf_openjdk_destination_path)&"\openjdk")
 			;_EnvVarSet("JAVA_HOME",GUICtrlRead($tf_openjdk_destination_path)&"\openjdk",3)
 		else
 			logging($progrssbarLabel,"Info","Creating new JAVA_HOME variable with path: "&GUICtrlRead($tf_openjdk_current_path))
