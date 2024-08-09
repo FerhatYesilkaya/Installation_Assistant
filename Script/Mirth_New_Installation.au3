@@ -25,7 +25,7 @@
 #RequireAdmin
 
   ; Create a GUI with various controls.
-Local $hGUI = GUICreate(readIni("defaults","mode"), 400, 410)
+Local $hGUI = GUICreate(readIni("defaults","mode"), 420, 410)
 
 
 GUICtrlCreateLabel("Database-Engine",5,5,200,25)
@@ -38,28 +38,33 @@ Next
 GUICtrlSetData($co_database_engine, "CACHE",readIni("defaults","defaultDatabaseEngineValue"))
 
 
-GUICtrlCreateLabel("Destination directory for the OpenJDK-Folder",5,50,300,25)
-$tf_openjdk_destination_path = GUICtrlCreateInput($openjdk_destination_path,5,65,200,20, $ES_READONLY)
-local $btn_choose_openjdk_destination_path = GUICtrlCreateButton("Directory",210,65,100,20)
+GUICtrlCreateLabel("Current OpenJDK-Folder",5,50,300,25)
+$tf_current_destination_path = GUICtrlCreateInput("",5,65,200,20, $ES_READONLY)
+local $btn_choose_current_openjdk_destination_path = GUICtrlCreateButton("Directory",210,65,100,20)
+local $btn_choose_current_openjdk_destination_path_reset = GUICtrlCreateButton("Reset",315,65,100,20)
 
-GUICtrlCreateLabel("New MIRTH installation path",5,95,200,25)
-$tf_new_mirth_installation_path = GUICtrlCreateInput(GoBack($mirth_install_path,1),5,110,200,20, $ES_READONLY)
-local $btn_choose_new_mirth_install_path = GUICtrlCreateButton("Directory",210,110,100,20)
+GUICtrlCreateLabel("Destination directory for the OpenJDK-Folder",5,95,300,25)
+$tf_openjdk_destination_path = GUICtrlCreateInput($openjdk_destination_path,5,110,200,20, $ES_READONLY)
+local $btn_choose_openjdk_destination_path = GUICtrlCreateButton("Directory",210,110,100,20)
 
-
-GUICtrlCreateLabel(".properties file",5,140,200,25)
-$tf_properties_file = GUICtrlCreateInput("",5,155,200,20, $ES_READONLY)
-local $btn_choose_properties_file = GUICtrlCreateButton("Directory",210,155,100,20)
-
-
-GUICtrlCreateLabel(".xml Backup file",5,185,200,25)
-local $tf_xml_backup_file = GUICtrlCreateInput("",5,200,200,20, $ES_READONLY)
-local $btn_choose_xml_backup_file = GUICtrlCreateButton("Directory",210,200,100,20)
+GUICtrlCreateLabel("New MIRTH installation path",5,140,200,25)
+$tf_new_mirth_installation_path = GUICtrlCreateInput(GoBack($mirth_install_path,1),5,155,200,20, $ES_READONLY)
+local $btn_choose_new_mirth_install_path = GUICtrlCreateButton("Directory",210,155,100,20)
 
 
-$btn_start_update = GUICtrlCreateButton("Start",0,240,400,40)
+GUICtrlCreateLabel(".properties file",5,185,200,25)
+$tf_properties_file = GUICtrlCreateInput("",5,200,200,20, $ES_READONLY)
+local $btn_choose_properties_file = GUICtrlCreateButton("Directory",210,200,100,20)
 
-local $progrssbarLabel = GUICtrlCreateLabel("",5,290,300,25)
+
+GUICtrlCreateLabel(".xml Backup file",5,230,200,25)
+local $tf_xml_backup_file = GUICtrlCreateInput("",5,245,200,20, $ES_READONLY)
+local $btn_choose_xml_backup_file = GUICtrlCreateButton("Directory",210,245,100,20)
+
+
+$btn_start_update = GUICtrlCreateButton("Start",0,290,420,40)
+
+local $progrssbarLabel = GUICtrlCreateLabel("",5,340,300,25)
 
 
 ;Local $update = GUICtrlCreateButton("Update", 0, 0, 400,200)
@@ -82,24 +87,29 @@ While 1
                         chooseNewMirthInstallationPath()
                 Case $btn_choose_openjdk_destination_path
                         chooseOpenJDKDestinationPath()
-				Case $btn_choose_properties_file
-						choosePropertiesPath()
-				Case $btn_choose_xml_backup_file
-						chooseXMLBackupFile()
+		Case $btn_choose_properties_file
+			choosePropertiesPath()
+		Case $btn_choose_xml_backup_file
+			chooseXMLBackupFile()
+                Case $btn_choose_current_openjdk_destination_path
+                        chooseCurrentOpenJDKPath()
+                Case $btn_choose_current_openjdk_destination_path_reset
+                        GUICtrlSetData($tf_current_destination_path,"")
+                        GUICtrlSetState($btn_choose_openjdk_destination_path,$GUI_ENABLE)
                 Case $btn_start_update
                         if(isAllDataEntered() = true) Then 
                                 WriteAllEnteredDataInLogs()
                                 GUICtrlSetState($btn_start_update,$GUI_DISABLE)
                                 logging($progrssbarLabel,"Info","Update started", true)
-                                unzipOpenJDK($progrssbarLabel)
-                                moveOpenJDK($progrssbarLabel,$tf_openjdk_destination_path)
+                                unzipOpenJDK($progrssbarLabel,$tf_openjdk_destination_path,$tf_current_destination_path)
                                 killProcesses($progrssbarLabel,"mccommand.exe")
                                 killProcesses($progrssbarLabel,"mcmanager.exe")
                                 killProcesses($progrssbarLabel,"mcserver.exe")
                                 uninstallJava($progrssbarLabel)
                                 Sleep(2000)
-                                checkForJRE($progrssbarLabel, $tf_openjdk_destination_path)
+                                checkForJRE($progrssbarLabel,$tf_current_destination_path,$tf_openjdk_destination_path)
                                 installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
+                                checkIfMirthConnectFolderExists($progrssbarLabel,$tf_new_mirth_installation_path)
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)
@@ -109,7 +119,7 @@ While 1
                                         configureBackupFile($progrssbarLabel,GUICtrlRead($tf_xml_backup_file),$co_database_engine)
 					importData($progrssbarLabel,GUICtrlRead($tf_xml_backup_file),GUICtrlRead($tf_properties_file),$tf_new_mirth_installation_path)
 				EndIf
-                                logging($progrssbarLabel,"Info","Update completed",true,true,64,true)
+                                logging($progrssbarLabel,"Info","Installation completed",true,true,64,true)
                         Else
                                 logging($progrssbarLabel,"Warning","Please fill in all necessary information",false,true,64,False)
                         EndIf
@@ -219,6 +229,23 @@ Func choosePropertiesPath()
 			; Display the list of selected files.
 			GUICtrlSetData($tf_properties_file,$sFileOpenDialog)
 	EndIf
+EndFunc
+
+
+Func chooseCurrentOpenJDKPath()
+        Local Const $sMessage = "Select a folder"
+
+        ; Display an open dialog to select a file.
+        Local $sFileSelectFolder = FileSelectFolder($sMessage, "")
+
+        If @error Then
+                ; Display the error message.
+                MsgBox($MB_SYSTEMMODAL, "", "No folder was selected.")
+        Else
+                ; Display the selected folder.
+                GUICtrlSetData($tf_current_destination_path,$sFileSelectFolder)
+                GUICtrlSetState($btn_choose_openjdk_destination_path,$GUI_DISABLE)
+        EndIf
 EndFunc
 
 Func chooseXMLBackupFile()

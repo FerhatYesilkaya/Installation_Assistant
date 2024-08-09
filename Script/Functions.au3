@@ -1,4 +1,4 @@
-#cs ----------------------------------------------------------------------------
+﻿#cs ----------------------------------------------------------------------------
 
  AutoIt Version: 3.3.16.1
  Author:         Ferhat Yesilkaya
@@ -30,11 +30,17 @@ Global $mirth_install_path = readIni("defaults","defaultCurrentMirthInstallation
 Global  $instance_cli = 0
 Global $sOutput = "" ; Store the output of StdoutRead to a variable.
 
-Func unzipOpenJDK(ByRef $progrssbarLabel)
+Func unzipOpenJDK(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path, ByRef $tf_current_destination_path)
 	if(readIni("workflow","unzipOpenJDK") = "false") Then
 			logging($progrssbarLabel,"Info","Skipping unzip openJDK because workflow-paramater for this was set to "&readIni("workflow","unzipOpenJDK"))
 			return 0
 	endif
+
+	if Not (GUICtrlRead($tf_current_destination_path) = "") Then
+		logging($progrssbarLabel,"Info","Skipping unzip openJDK because current OpenJDK is  given")
+		return 0
+	endif
+
 	logging($progrssbarLabel,"Info","Unzipping openJDK",true)
 	Local $zipFile = GoBack(@ScriptDir,2)&"\openjdk.zip"
 	Local $extractTo = GoBack(@ScriptDir,2)
@@ -59,6 +65,8 @@ Func unzipOpenJDK(ByRef $progrssbarLabel)
 	Else
 			logging($progrssbarLabel,"Error","Could not find openjdk.zip",true,16,true)
 	EndIf
+
+	moveOpenJDK($progrssbarLabel, $tf_openjdk_destination_path)
 	EndFunc
 
 
@@ -211,17 +219,31 @@ func uninstallJava(ByRef $progrssbarLabel)
 EndFunc
 
 
-Func checkForJRE(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path)
-	logging($progrssbarLabel,"Info","Checking if JAVA_HOME already exists")
+Func checkForJRE(ByRef $progrssbarLabel,  ByRef $tf_openjdk_current_path , ByRef $tf_openjdk_destination_path)
+	;~ $_iEnvType = 0 - Sets Enviroment Variable for all profiles
+	;~ $_iEnvType = 1 = Set Process Enviornment Variable
+	;~ $_iEnvType = 2 = Set System Enviornment Variable
+	;~ $_iEnvType = 3 = Set User Enviornment Variable
+	;~ $_iEnvType = 4 = Set Volatile Enviornment Variable
+	logging($progrssbarLabel,"Info","Checking if OpenJDK exists")
 	$currentJavaHome = EnvGet("JAVA_HOME")
 
 	if($currentJavaHome = "") Then
-		logging($progrssbarLabel,"Info","No JAVA_HOME system variable detected. Creating new JAVA_HOME variable with path: "&GUICtrlRead($tf_openjdk_destination_path)&"\openjdk")
-		_EnvVarSet("JAVA_HOME",GUICtrlRead($tf_openjdk_destination_path)&"\openjdk",2)
+		logging($progrssbarLabel,"Info","No JAVA_HOME system variable detected")
+		if(GUICtrlRead($tf_openjdk_current_path) = "") Then 
+			logging($progrssbarLabel,"Info","Creating new JAVA_HOME variable with path: "&GUICtrlRead($tf_openjdk_destination_path)&"\openjdk")
+			EnvSet("JAVA_HOME", "C:\ROCHE")
+			;_EnvVarSet("JAVA_HOME",GUICtrlRead($tf_openjdk_destination_path)&"\openjdk",3)
+		else
+			logging($progrssbarLabel,"Info","Creating new JAVA_HOME variable with path: "&GUICtrlRead($tf_openjdk_current_path))
+			EnvSet("JAVA_HOME", GUICtrlRead($tf_openjdk_current_path))
+			;_EnvVarSet("JAVA_HOME",GUICtrlRead($tf_openjdk_current_path),3)
+		Endif
+		return false
 	else
 		logging($progrssbarLabel,"Info","JAVA_HOME system variable detected. Current path: "&$currentJavaHome)
+		return true
 	EndIf
-
 EndFunc
 
 Func _EnvVarSet($_sEnvVarName = "", $_sEnvVarValue = "", $_iEnvVarType = 3)
@@ -241,7 +263,7 @@ Func _EnvVarSet($_sEnvVarName = "", $_sEnvVarValue = "", $_iEnvVarType = 3)
     EndSwitch
 EndFunc
 
-Func installMirthConnect(ByRef $progrssbarLabel, $tf_new_mirth_installation_path)
+Func installMirthConnect(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installation_path)
 	logging($progrssbarLabel,"Info","Installing Mirth Connect",true)
 	FileCopy(GoBack(@ScriptDir,1)&'\Data\Vanilla\mirth_connect.varfile',GoBack(@ScriptDir,1)&'\Data',1)
 	if @error Then
@@ -264,6 +286,17 @@ Func installMirthConnect(ByRef $progrssbarLabel, $tf_new_mirth_installation_path
 	executeCMD($progrssbarLabel,'"'&GoBack(@ScriptDir,2)&'\'&readIni("names","MirthConnectSetupFileName")&'" -q -varfile "'&GoBack(@ScriptDir,1)&'\Data\mirth_connect.varfile"')
 EndFunc
 
+Func checkIfMirthConnectFolderExists(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installation_path)
+	if Not (FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect")) Then
+		logging($progrssbarLabel,"Info","Mirth Connect Folder not available. Trying to install again")
+		installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
+		if Not (FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect")) Then
+			logging($progrssbarLabel,"Info","Mirth Connect Folder not available",false,true,16,true)
+		endif
+	else
+		logging($progrssbarLabel,"Info","Mirth Connect Folder available")
+	Endif
+Endfunc
 
 Func installMirthAdministrator(ByRef $progrssbarLabel, $tf_new_mirth_installation_path)
 
