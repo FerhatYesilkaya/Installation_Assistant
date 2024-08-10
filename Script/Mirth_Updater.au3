@@ -76,7 +76,6 @@ Local $aWindowClientArea_Size = WinGetClientSize($hGUI)
 ConsoleWrite('Window Client Area Width  = ' & $aWindowClientArea_Size[0] & @CRLF)
 ConsoleWrite('Window Client Area Height = ' & $aWindowClientArea_Size[1] & @CRLF)
 
-
 GUISetState(@SW_SHOW, $hGUI)
 
 $sDefaultPassChar = GUICtrlSendMsg($tf_password_admin_user, $EM_GETPASSWORDCHAR, 0, 0)
@@ -119,7 +118,7 @@ While 1
                                 checkIfMirthConnectFolderExists($progrssbarLabel,$tf_new_mirth_installation_path)
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
-                                configureBackupFile($progrssbarLabel,GUICtrlRead(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml'),$co_database_engine)
+                                configureBackupFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',$co_database_engine)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel, $mirthServiceName)
@@ -144,6 +143,7 @@ GUIDelete($hGUI)
 
 Func WriteAllEnteredDataInLogs()
         logging($progrssbarLabel,"Info","Database-Engine: "&GUICtrlRead($co_database_engine))
+        logging($progrssbarLabel,"Info","Current OpenJDK-Path: "&GUICtrlRead($tf_current_destination_path))
         logging($progrssbarLabel,"Info","OpenJDK-Path: "&GUICtrlRead($tf_openjdk_destination_path))
         logging($progrssbarLabel,"Info","New Mirth installation-path: "&GUICtrlRead($tf_new_mirth_installation_path))
         logging($progrssbarLabel,"Info","Current Mirth installation-path: "&GUICtrlRead($tf_current_mirth_installation_path))
@@ -184,6 +184,10 @@ Func uninstallMirthConnect()
 
         if (FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml') = 0 OR FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-configMap.properties') = 0) Then
                 logging($progrssbarLabel,"Error","Backup of configuration Map or general Backup not found. Both files are mandatory before uninstalling Mirth",false,true,16,true)
+        endif
+
+        If Not (FileExists(GUICtrlRead($tf_current_mirth_installation_path)&'\uninstall.exe')) Then
+                logging($progrssbarLabel,"Error","Could not find: "&GUICtrlRead($tf_current_mirth_installation_path)&'\uninstall.exe',false,true,16,true)
         endif
 
         logging($progrssbarLabel,"Info","Uninstalling Mirth Connect",true)
@@ -335,6 +339,17 @@ func uninstallMirthAdministrator()
                 logging($progrssbarLabel,"Info","Skipping uninstalling Mirth Administrator because workflow-paramater for this was set to "&readIni("workflow","uninstallMirthAdministrator"))
                 return 0
         endif
+
+        if Not (FileExists(GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe')) Then
+                logging($progrssbarLabel,"Warning","Could not find Mirth Administrator Folder in: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher')
+                $t = MsgBox (4, "Mirth Administrator" ,"Could not find Mirth Administrator Folder in: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher' &@CRLF& 'Do you want to continue?')
+                If $t = 6 Then
+                        logging($progrssbarLabel,"Info",'User pressed Yes - Script will continue')
+                ElseIf $t = 7 Then
+                        logging($progrssbarLabel,"Warning",'User pressed No - Script will stop',false,false,16,true)
+                EndIf
+        EndIf
+
         logging($progrssbarLabel,"Info","Uninstalling Mirth Administrator", true)
         executeCMD($progrssbarLabel,'"'&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe" -q')
 EndFunc

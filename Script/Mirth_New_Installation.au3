@@ -131,6 +131,7 @@ GUIDelete($hGUI)
 
 Func WriteAllEnteredDataInLogs()
         logging($progrssbarLabel,"Info","Database-Engine: "&GUICtrlRead($co_database_engine))
+        logging($progrssbarLabel,"Info","Current OpenJDK-Path: "&GUICtrlRead($tf_current_destination_path))
         logging($progrssbarLabel,"Info","OpenJDK-Path: "&GUICtrlRead($tf_openjdk_destination_path))
         logging($progrssbarLabel,"Info","New Mirth installation-path: "&GUICtrlRead($tf_new_mirth_installation_path))
         logging($progrssbarLabel,"Info","Properties filepath: "&GUICtrlRead($tf_properties_file))

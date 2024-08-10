@@ -94,22 +94,43 @@ Func GoBack($path, $levels = 1)
 EndFunc
 
 Func configureBackupFile(ByRef $progrssbarLabel, $backupFilePath, ByRef $co_database_engine)
-	if ($backupFilePath = "") Then
-		logging($progrssbarLabel,"Warning","No backup file imported, because no file selected")
+	$mode = readIni("defaults","mode") 
+
+	if ($backupFilePath = "" AND $mode = "New Installation") Then
+		logging($progrssbarLabel,"Info","No adjustmment in backup file, because no file was selected")
 		return 0
 	endif
 
 	logging($progrssbarLabel,"Info","Configuring backup file",true)
-	If (FileExists($backupFilePath) = 1) Then
-			stringReplaceFile($progrssbarLabel,$backupFilePath,"var driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
-			stringReplaceFile($progrssbarLabel,$backupFilePath,"driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
-			if(GUICtrlRead($co_database_engine) = "IRIS") Then
-					stringReplaceFile($progrssbarLabel,$backupFilePath,"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersys.jdbc.CacheDriver&apos;,&apos;jdbc:Cache:","DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:",False)
-			EndIf
-	Else
+
+
+	If ($mode = "New Installation") Then
+		If (FileExists($backupFilePath) = 1) Then
+			logging($progrssbarLabel,"Info","Found selected backup file")
+			changeXML($progrssbarLabel,$co_database_engine, $backupFilePath)
+		Else
 			logging($progrssbarLabel,"Error",'Could not find '&$backupFilePath,false,true,16,true)
+		Endif
+	Else
+		If (FileExists($backupFilePath) = 1) Then
+			logging($progrssbarLabel,"Info","Found automatically created backup file")
+			changeXML($progrssbarLabel,$co_database_engine, $backupFilePath)
+		Else
+			logging($progrssbarLabel,"Error",'Could not find '&$backupFilePath,false,true,16,true)
+		Endif
 	Endif
+
+	
 EndFunc
+
+Func changeXML(ByRef $progrssbarLabel, ByRef $co_database_engine, $backupFilePath)
+	stringReplaceFile($progrssbarLabel,$backupFilePath,"var driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
+	stringReplaceFile($progrssbarLabel,$backupFilePath,"driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
+	if(GUICtrlRead($co_database_engine) = "IRIS") Then
+			stringReplaceFile($progrssbarLabel,$backupFilePath,"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersys.jdbc.CacheDriver&apos;,&apos;jdbc:Cache:","DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:",False)
+	EndIf
+EndFunc
+
 
 Func logging(ByRef $progrssbarLabel, $level, $message, $showProgess=false, $showMessageBox=false,$flagForMessageBox=64, $doExit=false)
 	If Not FileExists(GoBack(@ScriptDir,1)&"\messages.log") Then
@@ -374,21 +395,22 @@ Func stringReplaceFile(ByRef $progrssbarLabel,$filePath,$search,$replace,$replac
 
 	$szText = FileRead($szFile,FileGetSize($szFile))
 
-	if (StringInStr($szText,$replace) > 0) Then
-			;skip
-	Else
 			if($replaceDriverXML) Then
 					logging($progrssbarLabel,"Info","replaceDriverXML was set to: "&$replaceDriverXML)
 					$szText = StringReplace($szText, $search, $replace&@CRLF&"</drivers>")
+					Local $iReplacements = @extended
+					logging($progrssbarLabel,"Info","Number of replacements: "&$iReplacements)
 			else
 					logging($progrssbarLabel,"Info","replaceDriverXML was set to: "&$replaceDriverXML)
 					$szText = StringReplace($szText, $search, $replace)
+					Local $iReplacements = @extended
+					logging($progrssbarLabel,"Info","Number of replacements: "&$iReplacements)
 			EndIf
 
 			FileDelete($szFile)
 	
 			FileWrite($szFile,$szText)
-	Endif
+
 EndFunc
 
 
