@@ -330,19 +330,15 @@ Func deleteFiles()
         EndIf
 EndFunc
 
-Func closeProcess()
-
-EndFunc
-
-func uninstallMirthAdministrator()
+Func uninstallMirthAdministrator()
         if(readIni("workflow","uninstallMirthAdministrator") = "false")  Then
                 logging($progrssbarLabel,"Info","Skipping uninstalling Mirth Administrator because workflow-paramater for this was set to "&readIni("workflow","uninstallMirthAdministrator"))
                 return 0
         endif
 
         if Not (FileExists(GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe')) Then
-                logging($progrssbarLabel,"Warning","Could not find Mirth Administrator Folder in: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher')
-                $t = MsgBox (4, "Mirth Administrator" ,"Could not find Mirth Administrator Folder in: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher' &@CRLF& 'Do you want to continue?')
+                logging($progrssbarLabel,"Warning","Could not find the uninstaller for Mirth Administrator: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe')
+                $t = MsgBox (4, "Mirth Administrator" ,"Could not find the uninstaller Mirth Administrator: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe' &@CRLF& 'Do you want to continue?')
                 If $t = 6 Then
                         logging($progrssbarLabel,"Info",'User pressed Yes - Script will continue')
                 ElseIf $t = 7 Then
