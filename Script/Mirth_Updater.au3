@@ -182,6 +182,8 @@ Func uninstallMirthConnect()
                 return 0
         endif
 
+        logging($progrssbarLabel,"Info","Uninstalling Mirth Connect",true)
+
         if (FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml') = 0 OR FileExists(GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-configMap.properties') = 0) Then
                 logging($progrssbarLabel,"Error","Backup of configuration Map or general Backup not found. Both files are mandatory before uninstalling Mirth",false,true,16,true)
         endif
@@ -190,7 +192,6 @@ Func uninstallMirthConnect()
                 logging($progrssbarLabel,"Error","Could not find: "&GUICtrlRead($tf_current_mirth_installation_path)&'\uninstall.exe',false,true,16,true)
         endif
 
-        logging($progrssbarLabel,"Info","Uninstalling Mirth Connect",true)
         executeCMD($progrssbarLabel,'"'&GUICtrlRead($tf_current_mirth_installation_path)&'\uninstall.exe" -q')
 
 EndFunc
@@ -335,17 +336,17 @@ Func uninstallMirthAdministrator()
                 logging($progrssbarLabel,"Info","Skipping uninstalling Mirth Administrator because workflow-paramater for this was set to "&readIni("workflow","uninstallMirthAdministrator"))
                 return 0
         endif
-
+        logging($progrssbarLabel,"Info","Uninstalling Mirth Administrator", true)
         if Not (FileExists(GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe')) Then
                 logging($progrssbarLabel,"Warning","Could not find the uninstaller for Mirth Administrator: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe')
-                $t = MsgBox (4, "Mirth Administrator" ,"Could not find the uninstaller Mirth Administrator: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe' &@CRLF& 'Do you want to continue?')
+                $t = MsgBox (4, "Mirth Administrator" ,"Could not find the uninstaller for Mirth Administrator: "&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe' &@CRLF& 'Do you want to continue?')
                 If $t = 6 Then
-                        logging($progrssbarLabel,"Info",'User pressed Yes - Script will continue')
+                        logging($progrssbarLabel,"Info",'User pressed Yes - Script will continue and will skip uninstalling Mirth Administrator')
+                        return 0
                 ElseIf $t = 7 Then
                         logging($progrssbarLabel,"Warning",'User pressed No - Script will stop',false,false,16,true)
                 EndIf
         EndIf
-
-        logging($progrssbarLabel,"Info","Uninstalling Mirth Administrator", true)
+        
         executeCMD($progrssbarLabel,'"'&GoBack(GUICtrlRead($tf_current_mirth_installation_path),1)&'\Mirth Connect Administrator Launcher\uninstall.exe" -q')
 EndFunc
