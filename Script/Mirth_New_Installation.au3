@@ -97,8 +97,6 @@ While 1
                         GUICtrlSetData($tf_current_destination_path,"")
                         GUICtrlSetState($btn_choose_openjdk_destination_path,$GUI_ENABLE)
                 Case $btn_start_update
-                        adjustVmOptionsFile($progrssbarLabel,$tf_new_mirth_installation_path, $mirthServiceName)
-                        exit
                         if(isAllDataEntered() = true) Then 
                                 WriteAllEnteredDataInLogs()
                                 GUICtrlSetState($btn_start_update,$GUI_DISABLE)
