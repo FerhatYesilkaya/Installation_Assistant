@@ -123,6 +123,7 @@ While 1
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel, $mirthServiceName)
                                 importData($progrssbarLabel, GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-configMap.properties',$tf_new_mirth_installation_path)
+                                adjustVmOptionsFile($progrssbarLabel,$tf_new_mirth_installation_path, $mirthServiceName)
                                 logging($progrssbarLabel,"Info","Update completed",true,true,64,true)
                         Else
                                 logging($progrssbarLabel,"Warning","Please fill in all necessary information",false,true,64,False)

@@ -70,6 +70,45 @@ Func unzipOpenJDK(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path, By
 	EndFunc
 
 
+	Func adjustVmOptionsFile(ByRef $progrssbarLabel,  ByRef $tf_new_mirth_installation_path, $mirthServiceName)
+
+		logging($progrssbarLabel,"Info","Adjusting vmoptions-file",true)
+
+		$appendTextFilePath = GUICtrlRead($tf_new_mirth_installation_path)&"\docs\mcservice-java9+.vmoptions"
+		$appendToFilePath = GUICtrlRead($tf_new_mirth_installation_path)&"\mcservice.vmoptions"
+
+		If(FileExists($appendTextFilePath)) Then
+			logging($progrssbarLabel,"Info","File found: "&$appendTextFilePath)
+			$handleAppendText = FileOpen($appendTextFilePath,0)
+			$appendText = FileRead($appendTextFilePath)
+			FileClose($handleAppendText)
+			If(FileExists($appendToFilePath)) Then
+				logging($progrssbarLabel,"Info","File found: "&$appendToFilePath)
+				$handleAppendTo = FileOpen($appendToFilePath,1)
+				$appendTo = FileRead($appendToFilePath)
+
+				if(StringInStr($appendTo,"--add-opens=java.xml/com.sun.org.apache.xalan.internal.xsltc.trax=ALL-UNNAMED") = 0) Then
+					logging($progrssbarLabel,"Info","Appending text to: "&$appendToFilePath)
+					FileWrite($handleAppendTo,$appendText)
+					FileClose($handleAppendTo)
+				Else
+					logging($progrssbarLabel,"Warning","entry: --add-opens=java.xml/com.sun.org.apache.xalan.internal.xsltc.trax=ALL-UNNAMED already exists in: "&$appendToFilePath&" --- Assuming that file is already adjusted --> Skipping step.")
+					return 0
+				endif
+				
+
+			else
+				logging($progrssbarLabel,"Error","Could not find: "&$appendToFilePath,false,true,16,false)
+			endif
+		else
+			logging($progrssbarLabel,"Error","Could not find: "&$appendTextFilePath,false,true,16,false)
+		EndIf
+
+		stopMirthService($progrssbarLabel,$mirthServiceName)
+		startingMirthService($progrssbarLabel, $mirthServiceName)
+
+	EndFunc
+
 	Func readIni($general, $title, $defaultValue=-1)
 
         $sFilePath = GoBack(@ScriptDir,1)&"\configurables.ini"
@@ -208,7 +247,6 @@ Func executeCMD(ByRef $progrssbarLabel, $command, $runAsRunWait=true)
 	$sStdOut &= StdoutRead($iPID)
 	Until @error
 	
-	logging($progrssbarLabel,"Info","Execution successful")
 	Return $sStdOut
 EndFunc
 

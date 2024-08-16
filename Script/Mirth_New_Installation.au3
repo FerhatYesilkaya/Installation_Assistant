@@ -97,10 +97,12 @@ While 1
                         GUICtrlSetData($tf_current_destination_path,"")
                         GUICtrlSetState($btn_choose_openjdk_destination_path,$GUI_ENABLE)
                 Case $btn_start_update
+                        adjustVmOptionsFile($progrssbarLabel,$tf_new_mirth_installation_path, $mirthServiceName)
+                        exit
                         if(isAllDataEntered() = true) Then 
                                 WriteAllEnteredDataInLogs()
                                 GUICtrlSetState($btn_start_update,$GUI_DISABLE)
-                                logging($progrssbarLabel,"Info","Update started", true)
+                                logging($progrssbarLabel,"Info","Installation started", true)
                                 unzipOpenJDK($progrssbarLabel,$tf_openjdk_destination_path,$tf_current_destination_path)
                                 killProcesses($progrssbarLabel,"mccommand.exe")
                                 killProcesses($progrssbarLabel,"mcmanager.exe")
@@ -119,6 +121,7 @@ While 1
                                         configureBackupFile($progrssbarLabel,GUICtrlRead($tf_xml_backup_file),$co_database_engine)
 					importData($progrssbarLabel,GUICtrlRead($tf_xml_backup_file),GUICtrlRead($tf_properties_file),$tf_new_mirth_installation_path)
 				EndIf
+                                adjustVmOptionsFile($progrssbarLabel,$tf_new_mirth_installation_path, $mirthServiceName)
                                 logging($progrssbarLabel,"Info","Installation completed",true,true,64,true)
                         Else
                                 logging($progrssbarLabel,"Warning","Please fill in all necessary information",false,true,64,False)
