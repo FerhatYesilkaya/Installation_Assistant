@@ -74,8 +74,8 @@ Func unzipOpenJDK(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path, By
 
 		logging($progrssbarLabel,"Info","Adjusting vmoptions-file",true)
 
-		$appendTextFilePath = GUICtrlRead($tf_new_mirth_installation_path)&"\docs\mcservice-java9+.vmoptions"
-		$appendToFilePath = GUICtrlRead($tf_new_mirth_installation_path)&"\mcservice.vmoptions"
+		$appendTextFilePath = GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\docs\mcservice-java9+.vmoptions"
+		$appendToFilePath = GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\mcservice.vmoptions"
 
 		If(FileExists($appendTextFilePath)) Then
 			logging($progrssbarLabel,"Info","File found: "&$appendTextFilePath)
@@ -95,13 +95,13 @@ Func unzipOpenJDK(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path, By
 					logging($progrssbarLabel,"Warning","entry: --add-opens=java.xml/com.sun.org.apache.xalan.internal.xsltc.trax=ALL-UNNAMED already exists in: "&$appendToFilePath&" --- Assuming that file is already adjusted --> Skipping step.")
 					return 0
 				endif
-				
-
 			else
-				logging($progrssbarLabel,"Error","Could not find: "&$appendToFilePath,false,true,16,false)
+				logging($progrssbarLabel,"Error","Could not find: "&$appendToFilePath&@CRLF&"Script will continue - Please adjust vmoptions file, if you have problems with launching Mirth",false,true,48,false)
+				return 0
 			endif
 		else
-			logging($progrssbarLabel,"Error","Could not find: "&$appendTextFilePath,false,true,16,false)
+			logging($progrssbarLabel,"Error","Could not find: "&$appendTextFilePath&@CRLF&"Script will continue - Please adjust vmoptions file, if you have problems with launching Mirth",false,true,48,false)
+			return 0
 		EndIf
 
 		stopMirthService($progrssbarLabel,$mirthServiceName)
@@ -358,7 +358,7 @@ Func checkIfMirthConnectFolderExists(ByRef $progrssbarLabel, ByRef $tf_new_mirth
 Endfunc
 
 Func installMirthAdministrator(ByRef $progrssbarLabel, $tf_new_mirth_installation_path)
-
+	logging($progrssbarLabel,"Info","Installing Mirth Administrator",true)
 	If (StringRegExp(GUICtrlRead($tf_new_mirth_installation_path), "^[A-Z]:\\$") = 1 ) Then
 		logging($progrssbarLabel,"Info","Replacing '\' with empty character for Mirth Administrator since it is the root of this drive")
 		$newString = StringReplace(GUICtrlRead($tf_new_mirth_installation_path),"\","")
