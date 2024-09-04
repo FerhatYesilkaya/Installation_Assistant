@@ -60,11 +60,21 @@ local $btn_choose_properties_file = GUICtrlCreateButton("Directory",210,200,100,
 GUICtrlCreateLabel(".xml Backup file",5,230,200,25)
 local $tf_xml_backup_file = GUICtrlCreateInput("",5,245,200,20, $ES_READONLY)
 local $btn_choose_xml_backup_file = GUICtrlCreateButton("Directory",210,245,100,20)
+local $btn_choose_xml_backup_file = GUICtrlCreateButton("Directory",210,245,100,20)
 
 
-$btn_start_update = GUICtrlCreateButton("Start",0,290,420,40)
+GUICtrlCreateLabel("Web Start Port",5,275,200,25)
+local $tf_web_start_port = GUICtrlCreateInput("",5,290,50,20)
+GUICtrlSetData($tf_web_start_port, readIni("defaults","defaultWebStartPort"),"")
 
-local $progrssbarLabel = GUICtrlCreateLabel("",5,340,300,25)
+
+GUICtrlCreateLabel("Administrator Port",100,275,200,25)
+local $tf_administrator_port = GUICtrlCreateInput("",100,290,50,20)
+GUICtrlSetData($tf_administrator_port, readIni("defaults","defaultAdministratorPort"),"")
+
+$btn_start_update = GUICtrlCreateButton("Start",0,330,420,40)
+
+local $progrssbarLabel = GUICtrlCreateLabel("",5,380,300,25)
 
 
 ;Local $update = GUICtrlCreateButton("Update", 0, 0, 400,200)
@@ -108,8 +118,8 @@ While 1
                                 uninstallJava($progrssbarLabel)
                                 Sleep(2000)
                                 checkForJRE($progrssbarLabel,$tf_current_destination_path,$tf_openjdk_destination_path)
-                                installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
-                                checkIfMirthConnectFolderExists($progrssbarLabel,$tf_new_mirth_installation_path)
+                                installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path, $tf_web_start_port, $tf_administrator_port)
+                                checkIfMirthConnectFolderExists($progrssbarLabel,$tf_new_mirth_installation_path, $tf_web_start_port, $tf_administrator_port)
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)

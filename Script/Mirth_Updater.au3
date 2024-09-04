@@ -62,9 +62,18 @@ local $tf_password_admin_user = GUICtrlCreateInput("",5,245,200,20, BitOR($GUI_S
 $rb_show_password = GUICtrlCreateCheckbox("Show Password",210,245)
 
 
-$btn_start_update = GUICtrlCreateButton("Start",0,290,420,40)
+GUICtrlCreateLabel("Web Start Port",5,275,200,25)
+local $tf_web_start_port = GUICtrlCreateInput("",5,290,50,20)
+GUICtrlSetData($tf_web_start_port, readIni("defaults","defaultWebStartPort"),"")
 
-local $progrssbarLabel = GUICtrlCreateLabel("",5,340,300,25)
+
+GUICtrlCreateLabel("Administrator Port",100,275,200,25)
+local $tf_administrator_port = GUICtrlCreateInput("",100,290,50,20)
+GUICtrlSetData($tf_administrator_port, readIni("defaults","defaultAdministratorPort"),"")
+
+$btn_start_update = GUICtrlCreateButton("Start",0,330,420,40)
+
+local $progrssbarLabel = GUICtrlCreateLabel("",5,380,300,25)
 
 
 ;Local $update = GUICtrlCreateButton("Update", 0, 0, 400,200)
@@ -114,8 +123,8 @@ While 1
                                 deleteFiles()
                                 Sleep(2000)
                                 checkForJRE($progrssbarLabel,$tf_current_destination_path,$tf_openjdk_destination_path)
-                                installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
-                                checkIfMirthConnectFolderExists($progrssbarLabel,$tf_new_mirth_installation_path)
+                                installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path, $tf_web_start_port, $tf_administrator_port)
+                                checkIfMirthConnectFolderExists($progrssbarLabel,$tf_new_mirth_installation_path, $tf_web_start_port, $tf_administrator_port)
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureBackupFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',$co_database_engine)

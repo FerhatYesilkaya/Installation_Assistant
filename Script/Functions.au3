@@ -24,6 +24,8 @@
 $mirthConnectPattern =  readIni("names","MirthConnectSetupFileName")
 $mirthAdministratorPattern = readIni("names","MirthAdministratorSetupFileName ")
 $mirthServiceName = readIni("names","mirthConnectServiceName")
+$webStartPort = readIni("defaults","defaultWebStartPort")
+$administratorPort = readIni("defaults","defaultAdministratorPort")
 Global $openjdk_destination_path = readIni("defaults","defaultOpenJDKPath")
 Global $mirth_install_path = readIni("defaults","defaultCurrentMirthInstallationPath")
 
@@ -163,11 +165,36 @@ Func configureBackupFile(ByRef $progrssbarLabel, $backupFilePath, ByRef $co_data
 EndFunc
 
 Func changeXML(ByRef $progrssbarLabel, ByRef $co_database_engine, $backupFilePath)
-	stringReplaceFile($progrssbarLabel,$backupFilePath,"var driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
-	stringReplaceFile($progrssbarLabel,$backupFilePath,"driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
-	if(GUICtrlRead($co_database_engine) = "IRIS") Then
-			stringReplaceFile($progrssbarLabel,$backupFilePath,"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersys.jdbc.CacheDriver&apos;,&apos;jdbc:Cache:","DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:",False)
-	EndIf
+
+	If FileExists($backupFilePath) Then
+		logging($progrssbarLabel, "Info","File: "&$backupFilePath&" found")
+
+		$szText = FileRead($backupFilePath,FileGetSize($backupFilePath))
+
+
+		If(StringInStr($szText,'// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver') > 0) Then
+			logging($progrssbarLabel,"Warning","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver already changed in this file. Skipping adjustment")
+		Else
+			stringReplaceFile($progrssbarLabel,$backupFilePath,"var driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// var driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
+		endif
+
+		If(StringInStr($szText,'// driver = new com.mirth.connect.connectors.jdbc.CustomDriver') > 0) Then
+			logging($progrssbarLabel,"Warning",'// driver = new com.mirth.connect.connectors.jdbc.CustomDriver already changed in this file. Skipping adjustment')
+		Else
+			stringReplaceFile($progrssbarLabel,$backupFilePath,"driver = new com.mirth.connect.connectors.jdbc.CustomDriver","// driver = new com.mirth.connect.connectors.jdbc.CustomDriver",False)
+		endif
+		
+		if(GUICtrlRead($co_database_engine) = "IRIS") Then
+			If(StringInStr($szText,'DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:') > 0) Then
+				logging($progrssbarLabel,"Warning",'"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:" already changed in this file. Skipping adjustment')
+			Else
+				stringReplaceFile($progrssbarLabel,$backupFilePath,"DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersys.jdbc.CacheDriver&apos;,&apos;jdbc:Cache:","DatabaseConnectionFactory.createDatabaseConnection(&apos;com.intersystems.jdbc.IRISDriver&apos;,&apos;jdbc:IRIS:",False)
+			endif
+		EndIf
+
+	else
+		logging($progrssbarLabel, "Error","Could not find: "&$backupFilePath,false,true,16,true)
+	endif
 EndFunc
 
 
@@ -322,7 +349,7 @@ Func _EnvVarSet($_sEnvVarName = "", $_sEnvVarValue = "", $_iEnvVarType = 3)
     EndSwitch
 EndFunc
 
-Func installMirthConnect(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installation_path)
+Func installMirthConnect(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installation_path, ByRef $tf_web_start_port, ByRef $tf_administrator_port)
 	logging($progrssbarLabel,"Info","Installing Mirth Connect",true)
 	FileCopy(GoBack(@ScriptDir,1)&'\Data\Vanilla\mirth_connect.varfile',GoBack(@ScriptDir,1)&'\Data',1)
 	if @error Then
@@ -342,13 +369,15 @@ Func installMirthConnect(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installatio
 	stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","dir.appdata=C\:\Program Files\Mirth Connect\appdata","dir.appdata="&$newString&"\\Mirth Connect\\appdata",false)
 	stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","dir.logs=C\:\Program Files\Mirth Connect\logs","dir.logs="&$newString&"\\Mirth Connect\\logs",false)
 	stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","sys.installationDir=C\:\Program Files\Mirth Connect","sys.installationDir="&$newString&"\\Mirth Connect",false)
+	stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","http.port.new$Long=8888","http.port.new$Long="&GUICtrlRead($tf_web_start_port),false)
+	stringReplaceFile($progrssbarLabel,GoBack(@ScriptDir,1)&"\Data\mirth_connect.varfile","https.port.new$Long=8443","https.port.new$Long="&GUICtrlRead($tf_administrator_port),false)
 	executeCMD($progrssbarLabel,'"'&GoBack(@ScriptDir,2)&'\'&readIni("names","MirthConnectSetupFileName")&'" -q -varfile "'&GoBack(@ScriptDir,1)&'\Data\mirth_connect.varfile"')
 EndFunc
 
-Func checkIfMirthConnectFolderExists(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installation_path)
+Func checkIfMirthConnectFolderExists(ByRef $progrssbarLabel, ByRef $tf_new_mirth_installation_path, ByRef $tf_web_start_port, ByRef $tf_administrator_port)
 	if Not (FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect")) Then
 		logging($progrssbarLabel,"Info","Mirth Connect Folder not available. Trying to install again")
-		installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path)
+		installMirthConnect($progrssbarLabel,$tf_new_mirth_installation_path, $tf_web_start_port, $tf_administrator_port)
 		if Not (FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect")) Then
 			logging($progrssbarLabel,"Info","Mirth Connect Folder not available",false,true,16,true)
 		endif
@@ -374,8 +403,21 @@ EndFunc
 Func configureDBDriversXML(ByRef $progrssbarLabel, $tf_new_mirth_installation_path)
 	logging($progrssbarLabel,"Info","Configuring driver.xml file",true)
 	If FileExists(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml") Then
+		$szText = FileRead(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml",FileGetSize(GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml"))
+
+
+		If(StringInStr($szText,'<driver class="com.intersystems.jdbc.CacheDriver" name="Cache" template="jdbc:Cache://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />') > 0) Then
+			logging($progrssbarLabel,"Warning","<driver class='com.intersystems.jdbc.CacheDriver' name='Cache' template='jdbc:Cache://127.0.0.1:1972/CONN' selectLimit='SELECT * FROM ? LIMIT 1' /> already exists in this file. Skipping adjustment")
+		Else
 			stringReplaceFile($progrssbarLabel,GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml","</drivers>",'<driver class="com.intersystems.jdbc.CacheDriver" name="Cache" template="jdbc:Cache://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />')
+		endif
+
+		If(StringInStr($szText,'<driver class="com.intersystems.jdbc.IRISDriver" name="IRIS" template="jdbc:IRIS://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />') > 0) Then
+			logging($progrssbarLabel,"Warning",'<driver class="com.intersystems.jdbc.IRISDriver" name="IRIS" template="jdbc:IRIS://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" /> already exists in this file. Skipping adjustment')
+		Else
 			stringReplaceFile($progrssbarLabel,GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml","</drivers>",'<driver class="com.intersystems.jdbc.IRISDriver" name="IRIS" template="jdbc:IRIS://127.0.0.1:1972/CONN" selectLimit="SELECT * FROM ? LIMIT 1" />')
+		endif
+
 	Else
 			logging($progrssbarLabel,"Error","Could not find "&GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\dbdrivers.xml",false,true,16,true)
 	Endif
@@ -439,7 +481,6 @@ Func stringReplaceFile(ByRef $progrssbarLabel,$filePath,$search,$replace,$replac
 					Local $iReplacements = @extended
 					logging($progrssbarLabel,"Info","Number of replacements: "&$iReplacements)
 			else
-					logging($progrssbarLabel,"Info","replaceDriverXML was set to: "&$replaceDriverXML)
 					$szText = StringReplace($szText, $search, $replace)
 					Local $iReplacements = @extended
 					logging($progrssbarLabel,"Info","Number of replacements: "&$iReplacements)
