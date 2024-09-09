@@ -147,6 +147,8 @@ Func WriteAllEnteredDataInLogs()
         logging($progrssbarLabel,"Info","New Mirth installation-path: "&GUICtrlRead($tf_new_mirth_installation_path))
         logging($progrssbarLabel,"Info","Properties filepath: "&GUICtrlRead($tf_properties_file))
         logging($progrssbarLabel,"Info","XML Backup filepath: "&GUICtrlRead($tf_xml_backup_file))
+        logging($progrssbarLabel,"Info","Web Start Port: "&GUICtrlRead($tf_web_start_port))
+        logging($progrssbarLabel,"Info","Administrator Port: "&GUICtrlRead($tf_administrator_port))
 EndFunc
 
 func findFile($pattern)
@@ -188,7 +190,7 @@ Func changeIniFile($section,$key, $value,$sFilePath=GoBack(@ScriptDir,1)&"\confi
 EndFunc
 
 Func isAllDataEntered()
-        if(GUICtrlRead($tf_new_mirth_installation_path) = "" Or GUICtrlRead($tf_openjdk_destination_path) = "") Then
+        if(GUICtrlRead($tf_new_mirth_installation_path) = "" Or GUICtrlRead($tf_openjdk_destination_path) = "" Or GUICtrlRead($tf_web_start_port) = "" Or GUICtrlRead($tf_administrator_port) = "") Then
                 return false
         Else
                 return true

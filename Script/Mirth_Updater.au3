@@ -157,6 +157,8 @@ Func WriteAllEnteredDataInLogs()
         logging($progrssbarLabel,"Info","OpenJDK-Path: "&GUICtrlRead($tf_openjdk_destination_path))
         logging($progrssbarLabel,"Info","New Mirth installation-path: "&GUICtrlRead($tf_new_mirth_installation_path))
         logging($progrssbarLabel,"Info","Current Mirth installation-path: "&GUICtrlRead($tf_current_mirth_installation_path))
+        logging($progrssbarLabel,"Info","Web Start Port: "&GUICtrlRead($tf_web_start_port))
+        logging($progrssbarLabel,"Info","Administrator Port: "&GUICtrlRead($tf_administrator_port))
 EndFunc
 
 
@@ -272,7 +274,7 @@ EndFunc
 
 
 Func isAllDataEntered()
-        if(GUICtrlRead($tf_current_mirth_installation_path) = "" Or GUICtrlRead($tf_openjdk_destination_path) = "" Or GUICtrlRead($tf_password_admin_user) = "") Then
+        if(GUICtrlRead($tf_current_mirth_installation_path) = "" Or GUICtrlRead($tf_openjdk_destination_path) = "" Or GUICtrlRead($tf_password_admin_user) = "" Or GUICtrlRead($tf_web_start_port) = "" Or GUICtrlRead($tf_administrator_port) = "") Then
                 return false
         Else
                 return true
