@@ -35,11 +35,11 @@ Func Example()
                         Case $GUI_EVENT_CLOSE
                                 ExitLoop
                         Case $update
-                                ShellExecute(@ScriptDir&"\Script\Mirth_Updater.exe")
+                                ShellExecute(@ScriptDir&"\Script\Mirth_Updater.au3")
                                 changingToUpdateMode()
                                 ExitLoop
                         Case $newInstallation
-                                ShellExecute(@ScriptDir&"\Script\Mirth_New_Installation.exe")
+                                ShellExecute(@ScriptDir&"\Script\Mirth_New_Installation.au3")
                                 changingToNewInstallationMode()
                                 ExitLoop
                 EndSwitch
