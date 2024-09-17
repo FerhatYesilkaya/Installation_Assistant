@@ -19,6 +19,7 @@
 #Include <WinAPI.au3>
 #include <ProgressConstants.au3>
 #include <FileConstants.au3>
+#include <ColorConstants.au3>
 #include <Date.au3> 
 
 $mirthConnectPattern =  readIni("names","MirthConnectSetupFileName")
@@ -69,6 +70,95 @@ Func unzipOpenJDK(ByRef $progrssbarLabel, ByRef $tf_openjdk_destination_path, By
 	EndIf
 
 	moveOpenJDK($progrssbarLabel, $tf_openjdk_destination_path)
+	EndFunc
+
+	Func ModifyFileContent(ByRef $progrssbarLabel, $sFilePath, $sPattern, $sReplacement)
+		; Überprüfen, ob die Datei existiert
+		If Not FileExists($sFilePath) Then
+			logging($progrssbarLabel,"Error","Could not find "&$sFilePath)
+			Return False
+		EndIf
+	
+		; Dateiinhalt lesen
+		Local $sFileContent = FileRead($sFilePath)
+		If @error Then
+			logging($progrssbarLabel,"Error","Could not read "&$sFilePath)
+			Return False
+		EndIf
+	
+		; Muster ersetzen
+		Local $sUpdatedContent = StringRegExpReplace($sFileContent, $sPattern, $sReplacement)
+	
+		; Überprüfen, ob das Muster gefunden und ersetzt wurde
+		If @error Then
+			logging($progrssbarLabel,"Error","Could not find string with provided pattern")
+			Return False
+		EndIf
+	
+		; Geänderten Inhalt in die Datei schreiben
+		Local $hFile = FileOpen($sFilePath, 2) ; 2 bedeutet Schreibmodus
+		If $hFile = -1 Then
+			logging($progrssbarLabel,"Error","Could not edit file: "&$sFilePath)
+			Return False
+		EndIf
+	
+		FileWrite($hFile, $sUpdatedContent)
+		FileClose($hFile)
+	
+		logging($progrssbarLabel,"Info","Replaced matched pattern with: "&$sReplacement)
+		Return True
+	EndFunc
+
+	Func checkButtonColor(ByRef $btn)
+        If(GUICtrlRead($btn) = "Activated") Then
+                GUICtrlSetData($btn, "Deactivated")
+                GUICtrlSetBkColor($btn,$COLOR_RED)
+        Else
+                GUICtrlSetData($btn, "Activated")
+                GUICtrlSetBkColor($btn,$COLOR_GREEN)
+        endif
+EndFunc
+
+	Func changePreferredJRE(ByRef $progrssbarLabel, ByRef $state, ByRef $tf_new_mirth_installation_path, ByRef $tf_openjdk_current_path, ByRef $tf_openjdk_destination_path)
+		If(GUICtrlRead($state) = "Activated") Then
+			logging($progrssbarLabel,"Info", "Using own JRE was activated")
+			If(GUICtrlRead($tf_openjdk_current_path) = "") Then
+				logging($progrssbarLabel,"Info", "Using new installation of openJDK")
+				CreateFileWithContent($progrssbarLabel, GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\.install4j\pref_jre.cfg", GUICtrlRead($tf_openjdk_destination_path))
+			else
+				logging($progrssbarLabel,"Info", "Using existing installation of openJDK")
+				CreateFileWithContent($progrssbarLabel, GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\.install4j\pref_jre.cfg", GUICtrlRead($tf_openjdk_current_path))
+			endif
+		else
+			logging($progrssbarLabel,"Info", "Not using own JRE, since it was deactivated")
+		Endif
+	EndFunc
+
+	Func CreateFileWithContent(ByRef $progrssbarLabel, $filePath, $content)
+		logging($progrssbarLabel, "Info", "Could not open file")
+		; Überprüfen, ob die Datei schon existiert
+		If FileExists($filePath) Then
+			logging($progrssbarLabel,"Info", "Deleting existing file")
+			FileDelete($filePath)
+		EndIf
+		
+		; Datei erstellen und öffnen
+		$fileHandle = FileOpen($filePath, 2)  ; 2 steht für "write mode"
+		
+		; Überprüfen, ob die Datei erfolgreich geöffnet wurde
+		If $fileHandle = -1 Then
+			logging($progrssbarLabel,"Info", "Could not open file")
+			Return False
+		EndIf
+		
+		; Inhalt in die Datei schreiben
+		FileWrite($fileHandle, $content)
+		logging($progrssbarLabel,"Info", "Created file with content: " &$content)
+		
+		; Datei schließen
+		FileClose($fileHandle)
+		
+		Return True
 	EndFunc
 
 
@@ -282,7 +372,7 @@ func uninstallJava(ByRef $progrssbarLabel)
 			logging($progrssbarLabel,"Info","Skipping uninstalling Java because workflow-paramater for this was set to "&readIni("workflow","uninstallJava"))
 			return 0
 	endif
-
+	logging($progrssbarLabel,"Info","Uninstalling Java",true)
 	Local $aList
 
 	; Lists all uninstall keys
@@ -294,8 +384,6 @@ func uninstallJava(ByRef $progrssbarLabel)
 			return 0
 	endif
 
-
-	logging($progrssbarLabel,"Info","Uninstalling Java",true)
 	$newString = StringReplace($aList[1][4],"/I","/X")
 
 

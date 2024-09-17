@@ -25,7 +25,7 @@
 #RequireAdmin
 
   ; Create a GUI with various controls.
-Local $hGUI = GUICreate(readIni("defaults","mode"), 420, 410)
+Local $hGUI = GUICreate(readIni("defaults","mode"), 420, 450)
 
 
 GUICtrlCreateLabel("Database-Engine",5,5,200,25)
@@ -60,7 +60,6 @@ local $btn_choose_properties_file = GUICtrlCreateButton("Directory",210,200,100,
 GUICtrlCreateLabel(".xml Backup file",5,230,200,25)
 local $tf_xml_backup_file = GUICtrlCreateInput("",5,245,200,20, $ES_READONLY)
 local $btn_choose_xml_backup_file = GUICtrlCreateButton("Directory",210,245,100,20)
-local $btn_choose_xml_backup_file = GUICtrlCreateButton("Directory",210,245,100,20)
 
 
 GUICtrlCreateLabel("Web Start Port",5,275,200,25)
@@ -72,12 +71,13 @@ GUICtrlCreateLabel("Administrator Port",100,275,200,25)
 local $tf_administrator_port = GUICtrlCreateInput("",100,290,50,20)
 GUICtrlSetData($tf_administrator_port, readIni("defaults","defaultAdministratorPort"),"")
 
-$btn_start_update = GUICtrlCreateButton("Start",0,330,420,40)
+GUICtrlCreateLabel("Use own JRE Path for Mirth",195,275,200,25)
+local $btn_own_jre_path = GUICtrlCreateButton("Activated",210,290,100,30)
+GUICtrlSetBkColor(-1,$COLOR_GREEN)
 
-local $progrssbarLabel = GUICtrlCreateLabel("",5,380,300,25)
+$btn_start_update = GUICtrlCreateButton("Start",0,370,420,40)
 
-
-;Local $update = GUICtrlCreateButton("Update", 0, 0, 400,200)
+local $progrssbarLabel = GUICtrlCreateLabel("",5,420,300,25)
 
 Local $aWindow_Size = WinGetPos($hGUI)
 ConsoleWrite('Window Width  = ' & $aWindow_Size[2] & @CRLF)
@@ -123,6 +123,8 @@ While 1
                                 installMirthAdministrator($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)
+                                ModifyFileContent($progrssbarLabel,GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\mirth-cli-config.properties","address=(https://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+)","address=https://127.0.0.1:"&GUICtrlRead($tf_administrator_port))
+                                changePreferredJRE($progrssbarLabel,$btn_own_jre_path,$tf_new_mirth_installation_path,$tf_current_destination_path,$tf_openjdk_destination_path)
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel,$mirthServiceName)
 				if(isImportNeeded()) Then
@@ -134,6 +136,10 @@ While 1
                         Else
                                 logging($progrssbarLabel,"Warning","Please fill in all necessary information",false,true,64,False)
                         EndIf
+
+                        Case $btn_own_jre_path
+                                checkButtonColor($btn_own_jre_path)
+
         EndSwitch
 WEnd
 
@@ -149,6 +155,7 @@ Func WriteAllEnteredDataInLogs()
         logging($progrssbarLabel,"Info","XML Backup filepath: "&GUICtrlRead($tf_xml_backup_file))
         logging($progrssbarLabel,"Info","Web Start Port: "&GUICtrlRead($tf_web_start_port))
         logging($progrssbarLabel,"Info","Administrator Port: "&GUICtrlRead($tf_administrator_port))
+        logging($progrssbarLabel,"Info","Use own JRE Path: "&GUICtrlRead($btn_own_jre_path))
 EndFunc
 
 func findFile($pattern)

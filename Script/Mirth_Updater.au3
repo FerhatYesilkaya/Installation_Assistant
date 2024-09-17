@@ -25,7 +25,7 @@
 #RequireAdmin
 
   ; Create a GUI with various controls.
-Local $hGUI = GUICreate(readIni("defaults","mode"), 420, 410)
+Local $hGUI = GUICreate(readIni("defaults","mode"), 420, 450)
 
 
 GUICtrlCreateLabel("Database-Engine",5,5,200,25)
@@ -71,9 +71,13 @@ GUICtrlCreateLabel("Administrator Port",100,275,200,25)
 local $tf_administrator_port = GUICtrlCreateInput("",100,290,50,20)
 GUICtrlSetData($tf_administrator_port, readIni("defaults","defaultAdministratorPort"),"")
 
-$btn_start_update = GUICtrlCreateButton("Start",0,330,420,40)
+GUICtrlCreateLabel("Use own JRE Path for Mirth",195,275,200,25)
+local $btn_own_jre_path = GUICtrlCreateButton("Activated",210,290,100,30)
+GUICtrlSetBkColor(-1,$COLOR_GREEN)
 
-local $progrssbarLabel = GUICtrlCreateLabel("",5,380,300,25)
+$btn_start_update = GUICtrlCreateButton("Start",0,370,420,40)
+
+local $progrssbarLabel = GUICtrlCreateLabel("",5,420,300,25)
 
 
 ;Local $update = GUICtrlCreateButton("Update", 0, 0, 400,200)
@@ -129,6 +133,7 @@ While 1
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureBackupFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',$co_database_engine)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)
+                                changePreferredJRE($progrssbarLabel,$btn_own_jre_path,$tf_new_mirth_installation_path,$tf_current_destination_path,$tf_openjdk_destination_path)
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel, $mirthServiceName)
                                 importData($progrssbarLabel, GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-configMap.properties',$tf_new_mirth_installation_path)
@@ -145,6 +150,10 @@ While 1
                                 GUICtrlSendMsg($tf_password_admin_user, $EM_SETPASSWORDCHAR, $sDefaultPassChar, 0)
                                 _WinAPI_SetFocus(ControlGetHandle("","",$tf_password_admin_user))
                             EndIf
+
+                            
+                        Case $btn_own_jre_path
+                                checkButtonColor($btn_own_jre_path)
         EndSwitch
 WEnd
 
@@ -159,6 +168,7 @@ Func WriteAllEnteredDataInLogs()
         logging($progrssbarLabel,"Info","Current Mirth installation-path: "&GUICtrlRead($tf_current_mirth_installation_path))
         logging($progrssbarLabel,"Info","Web Start Port: "&GUICtrlRead($tf_web_start_port))
         logging($progrssbarLabel,"Info","Administrator Port: "&GUICtrlRead($tf_administrator_port))
+        logging($progrssbarLabel,"Info","Use own JRE Path: "&GUICtrlRead($btn_own_jre_path))
 EndFunc
 
 
