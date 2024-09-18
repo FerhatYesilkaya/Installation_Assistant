@@ -133,6 +133,7 @@ While 1
                                 configureDBDriversXML($progrssbarLabel,$tf_new_mirth_installation_path)
                                 configureBackupFile($progrssbarLabel,GoBack(@ScriptDir,1)&'\Backups\'&@YEAR&'-'&@MON&'-'&@MDAY&'-Mirth Backup.xml',$co_database_engine)
                                 moveJarFiles($progrssbarLabel,$tf_new_mirth_installation_path)
+                                ModifyFileContent($progrssbarLabel,GUICtrlRead($tf_new_mirth_installation_path)&"\Mirth Connect\conf\mirth-cli-config.properties","address=(https://[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+:[0-9]+)","address=https://127.0.0.1:"&GUICtrlRead($tf_administrator_port))
                                 changePreferredJRE($progrssbarLabel,$btn_own_jre_path,$tf_new_mirth_installation_path,$tf_current_destination_path,$tf_openjdk_destination_path)
                                 stopMirthService($progrssbarLabel,$mirthServiceName)
                                 startingMirthService($progrssbarLabel, $mirthServiceName)
