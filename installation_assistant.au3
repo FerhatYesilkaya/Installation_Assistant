@@ -110,3 +110,12 @@ Func changeIniFile($section,$key, $value,$sFilePath=@ScriptDir&"\configurables.i
         IniWrite($sFilePath, $section,$key,$value)
         logging("Info","Changing section: "&$section&" key: "&$key&" to value: "&$value)
 EndFunc
+
+Func readIni($general, $title, $defaultValue=-1)
+
+        $sFilePath = @ScriptDir&"\configurables.ini"
+
+        ; Read the INI file for the value of 'Title' in the section labelled 'General'.
+        $sRead = IniRead($sFilePath, $general, $title, $defaultValue)
+        return $sRead
+EndFunc   ;==>Example
