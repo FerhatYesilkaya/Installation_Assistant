@@ -25,7 +25,7 @@
 #RequireAdmin
 
   ; Create a GUI with various controls.
-Local $hGUI = GUICreate(readIni("defaults","mode"), 420, 450)
+Local $hGUI = GUICreate(readIni("defaults","mode")&" - Version "&readIni("defaults","version","<Info unavailable>"), 420, 450)
 
 
 GUICtrlCreateLabel("Database-Engine",5,5,200,25)
@@ -72,8 +72,8 @@ local $tf_administrator_port = GUICtrlCreateInput("",100,290,50,20)
 GUICtrlSetData($tf_administrator_port, readIni("defaults","defaultAdministratorPort"),"")
 
 GUICtrlCreateLabel("Use own JRE Path for Mirth",195,275,200,25)
-local $btn_own_jre_path = GUICtrlCreateButton("Activated",210,290,100,30)
-GUICtrlSetBkColor(-1,$COLOR_GREEN)
+local $btn_own_jre_path = GUICtrlCreateButton("Deactivated",210,290,100,30)
+GUICtrlSetBkColor(-1,$COLOR_RED)
 
 $btn_start_update = GUICtrlCreateButton("Start",0,370,420,40)
 

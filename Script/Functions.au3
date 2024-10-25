@@ -387,7 +387,7 @@ func uninstallJava(ByRef $progrssbarLabel)
 	$newString = StringReplace($aList[1][4],"/I","/X")
 
 
-	executeCMD($progrssbarLabel,'"'&$newString&'" /qn')
+	executeCMD($progrssbarLabel,$newString&' /qn')
 
 
 EndFunc

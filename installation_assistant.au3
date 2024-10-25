@@ -14,7 +14,7 @@ Example()
 
 Func Example()
         ; Create a GUI with various controls.
-        Local $hGUI = GUICreate("Selector", 400, 410)
+        Local $hGUI = GUICreate("Selector - Version "&readIni("defaults","version","<Info unavailable>"), 400, 410)
 
         Local $update = GUICtrlCreateButton("Update", 0, 0, 400,200)
         Local $newInstallation = GUICtrlCreateButton("New Installation", 0, 210, 400,200)
