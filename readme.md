@@ -3,3 +3,6 @@
 
 # Update Notes 1.0.5
 - Fixed bug where Java JRE was not uninstalled
+
+# Additional Information
+- Additional Information is in the UserGuide
